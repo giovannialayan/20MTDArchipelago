@@ -137,3 +137,61 @@ item_table: Dict[str, ItemData] = {
     "anomaly card": ItemData(offset + 300),
     "anomaly element": ItemData(offset + 301),
 }
+
+item_id_to_name: Dict[int, str] = {
+    data.code: item_name for item_name, data in item_table.items() if data.code
+}
+
+item_name_to_id: Dict[str, int] = {
+    item_name: data.code for item_name, data in item_table.items() if data.code
+}
+
+deck_id_to_name: Dict[int, str] = {
+    data.code: item_name for item_name, data in item_table.items() if isDeck(item_name)
+}
+
+deck_name_to_id: Dict[str, int] = {
+    item_name: data.code for item_name, data in item_table.items() if isDeck(item_name)
+}
+
+def isDeck(item_name: str) -> bool: 
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 1 and item_id <= 39)
+
+def isYourDeck(item_name: str) -> bool: 
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 1 and item_id <= 19)
+
+def isTheirDeck(item_name: str) -> bool: 
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 20 and item_id <= 39)
+
+def isCard(item_name: str) -> bool:
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 40 and item_id <= 189)
+
+def isElement(item_name: str) -> bool:
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 190 and item_id <= 299)
+
+def isTrap(item_name: str) -> bool:
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 300 and item_id <= 310)
+
+def isProgression(item_name: str) -> bool:
+    return (
+        isDeck(item_name) or
+        isCard(item_name) or
+        isElement(item_name)
+    )
+
+def get_category(item_name: str) -> str:
+    if isCard(item_name):
+        return "Card"
+    if isElement(item_name):
+        return "Element"
+    if isYourDeck(item_name):
+        return "Your Deck"
+    if isTheirDeck(item_name):
+        return "Their Deck"
+    return "Other"
