@@ -66,11 +66,11 @@ class DeathLink(Toggle):
     display_name = "Death Link"
 
 class Traps(Range):
-    """percentage of filler items that will be traps"""
-    display_name = "trap percentage of filler items"
+    """number of items that will be traps"""
+    display_name = "number of trap items"
     range_start = 0
     range_end = 100
-    default = 15
+    default = 10
 
 @dataclass
 class StellaOptions(PerGameCommonOptions):

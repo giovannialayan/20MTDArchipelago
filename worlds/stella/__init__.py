@@ -1,9 +1,10 @@
-from typing import Dict
+from typing import Dict, Union, List
 from worlds.AutoWorld import World
-from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, isUseful
-from .locations import StellaLocation
+from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name
+from .items import offset as item_offset
+from .locations import StellaLocation, stella_location_name_to_id, stella_location_id_to_name
 from .options import StellaOptions
-from BaseClasses import ItemClassification
+from BaseClasses import ItemClassification, Region
 
 #https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/world%20api.md
 
@@ -18,7 +19,19 @@ class StellaWorld(World):
 
     topology_present = False
 
+    locations_set = 0
+    shop_card_locations = dict()
+    shop_element_locations = dict()
+
+    item_name_to_id = item_name_to_id
+    item_id_to_name = item_id_to_name
+
+    location_id_to_name = stella_location_id_to_name
+    location_name_to_id = stella_location_name_to_id
+
     required_difficulty = 0
+
+    distributed_fillers = dict()
 
     itempool: list
 
@@ -46,7 +59,7 @@ class StellaWorld(World):
             deck_name = deck[0]
             deck_data = deck[1]
 
-            precollected_item = self.create_item(deck_name, ItemClassification.progression)
+            precollected_item = self.create_item(deck_name)
             self.multiworld.push_precollected(precollected_item)
             excluded_items[deck_name] = deck_data
             your_deck_tuple_list.remove(deck)
@@ -56,18 +69,49 @@ class StellaWorld(World):
             deck_name = deck[0]
             deck_data = deck[1]
 
-            precollected_item = self.create_item(deck_name, ItemClassification.progression)
+            precollected_item = self.create_item(deck_name)
             self.multiworld.push_precollected(precollected_item)
             excluded_items[deck_name] = deck_data
             their_deck_tuple_list.remove(deck)
 
         self.itempool = []
         for item_name in item_table:
+            self.itempool.append(self.create_item(item_name))
 
-            classification = ItemClassification.filler
-            if isProgression(item_name):
-                classification = ItemClassification.progression
-            
-            self.itempool.append(self.create_item(item_name, classification))
+        for i in range(self.options.traps):
+            trap_id = self.random.randint(300, 306)
+            self.itempool.append(self.create_item(item_id_to_name[trap_id + item_offset]))
+
+        pool_remaining = self.locations_set - len(self.itempool)
+        for i in range(pool_remaining):
+            filler_id = self.random.randint(320, 326)
+            self.itempool.append(self.create_item(filler_id))
 
         self.multiworld.itempool += self.itempool
+
+    def create_item(self, item: Union[str, ItemData]):
+        item_name = ""
+        if isinstance(item, str):
+            item_name = item
+            item = item_table[item]
+        else:
+            item_name = item_table[item]
+
+        classification = ItemClassification.filler
+
+        if isProgression(item_name):
+            classification = ItemClassification.progression
+
+        if classification is ItemClassification.filler:
+            if self.distributed_fillers.get(item_name) is None:
+                self.distributed_fillers[item_name] = 1
+            else:
+                self.distributed_fillers[item_name] += 1
+
+        return StellaItem(item_name, classification, item.code, self.player)
+    
+    def create_regions(self):
+        menu_region = Region("Menu", self.player, self.multiworld)
+
+        self.multiworld.regions.append(menu_region)
+        all_locations: List[StellaLocation] = list()

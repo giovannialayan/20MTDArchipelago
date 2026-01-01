@@ -134,8 +134,22 @@ item_table: Dict[str, ItemData] = {
     "neves": ItemData(offset + 231),
 
     #traps
-    "anomaly card": ItemData(offset + 300),
-    "anomaly element": ItemData(offset + 301),
+    "anomaly card trap": ItemData(offset + 300),
+    "anomaly element trap": ItemData(offset + 301),
+    "lose money trap": ItemData(offset + 302),
+    "discard trap": ItemData(offset + 303),
+    "eternal trap": ItemData(offset + 304),
+    "destroy your card trap": ItemData(offset + 305),
+    "destroy their card trap": ItemData(offset + 306),
+
+    #filler
+    "gain random money": ItemData(offset + 320),
+    "gain random max element power": ItemData(offset + 321),
+    "double next card purchase": ItemData(offset + 322),
+    "free element in shop": ItemData(offset + 323),
+    "free card in shop": ItemData(offset + 324),
+    "free deck expansion in shop": ItemData(offset + 325),
+    "free +max element power in shop": ItemData(offset + 326)
 }
 
 item_id_to_name: Dict[int, str] = {
@@ -166,6 +180,10 @@ traps: Dict[int, str] = {
     data.code: data.code for item_name, data in item_table.items() if data.code and isTrap(item_name)
 }
 
+fillers: Dict[int, str] = {
+    data.code: data.code for item_name, data in item_table.items() if data.code and isFiller(item_name)
+}
+
 def isDeck(item_name: str) -> bool: 
     item_id = item_name_to_id[item_name] - offset
     return (item_id >= 1 and item_id <= 39)
@@ -188,7 +206,11 @@ def isElement(item_name: str) -> bool:
 
 def isTrap(item_name: str) -> bool:
     item_id = item_name_to_id[item_name] - offset
-    return (item_id >= 300 and item_id <= 310)
+    return (item_id >= 300 and item_id <= 319)
+
+def isFiller(item_name: str) -> bool:
+    item_id = item_name_to_id[item_name] - offset
+    return (item_id >= 320 and item_id <= 339)
 
 def isProgression(item_name: str) -> bool:
     return (
