@@ -1,10 +1,10 @@
 from typing import Dict, Union, List
 from worlds.AutoWorld import World
-from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name, deck_id_to_name, cards_and_elements
+from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name, deck_id_to_name, cards_and_elements, elements
 from .items import offset as item_offset
 from .locations import StellaLocation, stella_location_name_to_id, stella_location_id_to_name, stella_location_id_to_difficulty, stella_location_id_to_lightyear
 from .options import StellaOptions
-from BaseClasses import ItemClassification, Region, LocationProgressType
+from BaseClasses import ItemClassification, Region, LocationProgressType, CollectionState
 from worlds.generic.Rules import add_rule
 
 #https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/world%20api.md
@@ -135,3 +135,35 @@ class StellaWorld(World):
 
                     if lightyear >= 5:
                         add_rule(new_location, lambda state, _lightyear_=lightyear: state.has_from_list(list(cards_and_elements.values()), self.player, 4 + _lightyear_ * 2))
+
+                    if lightyear > 3:
+                        add_rule(new_location, lambda state, _difficulty_=difficulty: state.has_from_list(list(elements.values()), self.player, (_difficulty_ - 2) * 3))
+
+                    self.locations_set += 1
+                    all_locations.append(new_location)
+                    deck_region.locations.append(new_location)
+
+            self.multiworld.regions.append(deck_region)
+
+            # note: might need more here for deck difficulties?
+            menu_region.connect(deck_region, None, lambda state, _deck_name_=deck_name: state.has(_deck_name_, self.player))
+
+        def can_reach_count(state: CollectionState, locations: List[StellaLocation], count: int = 1) -> bool:
+            counter = 0
+            for loc in locations:
+                if state.can_reach_location(loc.name, self.player):
+                    counter += 1
+                    if counter >= count:
+                        return True
+            return False
+    
+        def get_locations_where(deck: str = None, lightyear: int = None, difficulty: int = None) -> list:
+            return list([loc for loc in all_locations if (lightyear == None or loc.lightyear == lightyear) and (difficulty == None or loc.difficulty == difficulty) and (deck == None or loc.deck == deck)])
+        
+        # shop region
+        for location in stella_location_name_to_id:
+            if str(location).startswith("Shop card"):
+                self.shop_card_locations[stella_location_name_to_id[location]] = location
+            if str(location).startswith("Shop element"):
+                self.shop_element_locations[stella_location_name_to_id[location]] = location
+        

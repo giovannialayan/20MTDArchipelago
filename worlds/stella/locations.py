@@ -1,7 +1,8 @@
 from BaseClasses import Location
 from .items import deck_id_to_name
 
-max_shop_checks = 200
+max_shop_card_checks = 100
+max_shop_element_checks = 100
 
 offset = 84275609_000
 
@@ -32,10 +33,19 @@ for deck in deck_id_to_name:
 
 shop_id_offset = prev_id + 1
 
-for i in range(11):
-    for j in range(max_shop_checks):
+for i in range(6):
+    for j in range(max_shop_card_checks):
         prev_id += 1
-        location_name = "Shop item " + str(j + 1) + " at difficulty " + i
+        location_name = "Shop card " + str(j + 1) + " at difficulty " + i
+        location_id = prev_id
+
+        stella_location_name_to_id[location_name] = location_id
+        stella_location_id_to_name[location_id] = location_name
+
+for i in range(6):
+    for j in range(max_shop_element_checks):
+        prev_id += 1
+        location_name = "Shop element " + str(j + 1) + " at difficulty " + i
         location_id = prev_id
 
         stella_location_name_to_id[location_name] = location_id
