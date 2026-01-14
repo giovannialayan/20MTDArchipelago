@@ -1,9 +1,11 @@
 from typing import Dict, Union, List
 from worlds.AutoWorld import World
-from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name, deck_id_to_name, cards_and_elements, elements
+from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name, deck_id_to_name, \
+cards_and_elements, elements
 from .items import offset as item_offset
-from .locations import StellaLocation, stella_location_name_to_id, stella_location_id_to_name, stella_location_id_to_difficulty, stella_location_id_to_lightyear
-from .options import StellaOptions
+from .locations import StellaLocation, stella_location_name_to_id, stella_location_id_to_name, stella_location_id_to_difficulty, stella_location_id_to_lightyear, \
+card_id_offset, element_id_offset, max_shop_card_checks, max_shop_element_checks
+from .options import StellaOptions, Goal, DecksToWin, DifficultyToWin
 from BaseClasses import ItemClassification, Region, LocationProgressType, CollectionState
 from worlds.generic.Rules import add_rule
 
@@ -160,10 +162,28 @@ class StellaWorld(World):
         def get_locations_where(deck: str = None, lightyear: int = None, difficulty: int = None) -> list:
             return list([loc for loc in all_locations if (lightyear == None or loc.lightyear == lightyear) and (difficulty == None or loc.difficulty == difficulty) and (deck == None or loc.deck == deck)])
         
-        # shop region
-        for location in stella_location_name_to_id:
-            if str(location).startswith("Shop card"):
-                self.shop_card_locations[stella_location_name_to_id[location]] = location
-            if str(location).startswith("Shop element"):
-                self.shop_element_locations[stella_location_name_to_id[location]] = location
+        #goals
+        if self.options.goal.value == Goal.option_beat_decks:
+            self.multiworld.completion_condition[self.player] = lambda state: can_reach_count(state, get_locations_where(None, 10, 0), self.options.decks_to_win.value)
+        elif self.options.goal.value == Goal.option_beat_decks_on_difficulty:
+            self.multiworld.completion_condition[self.player] = lambda state: can_reach_count(state, get_locations_where(None, 10, self.required_difficulty), self.options.decks_to_win.value)
+        elif self.options.goal.value == Goal.option_beat_difficulty:
+            self.multiworld.completion_condition[self.player] = lambda state: can_reach_count(state, get_locations_where(None, 10, self.required_difficulty), 1)
+
+    def fill_slot_data(self):
+        min_price = self.options.minimum_shop_price
+        max_price = self.options.maximum_shop_price
+
+        if min_price > max_price:
+            min_price, max_price = max_price, min_price
+
+        base_data = {
+            "goal": self.options.goal.value,
+            "decks_to_win": self.options.decks_to_win.value,
+            "required_difficulty": self.options.difficulty_to_win,
+            "min_price": min_price,
+            "max_price": max_price,
+            "deathlink": bool(self.options.death_link)
+        }
+        return base_data
         
