@@ -1,15 +1,30 @@
 from typing import Dict, Union, List
-from worlds.AutoWorld import World
+from worlds.AutoWorld import World, WebWorld
 from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name, deck_id_to_name, \
 cards_and_elements, elements
 from .items import offset as item_offset
 from .locations import StellaLocation, stella_location_name_to_id, stella_location_id_to_name, stella_location_id_to_difficulty, stella_location_id_to_lightyear, \
 card_id_offset, element_id_offset, max_shop_card_checks, max_shop_element_checks
 from .options import StellaOptions, Goal, DecksToWin, DifficultyToWin
-from BaseClasses import ItemClassification, Region, LocationProgressType, CollectionState
+from BaseClasses import ItemClassification, Region, LocationProgressType, CollectionState, Tutorial
 from worlds.generic.Rules import add_rule
 
 #https://github.com/ArchipelagoMW/Archipelago/blob/main/docs/world%20api.md
+
+class StellaWebWorld(WebWorld):
+    theme = "grassFlowers"
+    bug_report_page = ""
+    rich_text_options_doc = True
+    setup_en = Tutorial(
+        "Stella guide",
+        "how to play Stella with Archipelago",
+        "English",
+        "setup_en.md",
+        "setup/en",
+        ["oig"]
+    )
+
+    tutorials = [setup_en]
 
 class StellaWorld(World):
     """
