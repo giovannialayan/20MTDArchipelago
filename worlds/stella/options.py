@@ -62,7 +62,7 @@ class TheirDecksUnlockedFromStart(Range):
     default = 1
 
 class DeathLink(Toggle):
-    """when your run ends, everybody will die. when somebody else dies, your run will end."""
+    """when you lose your run, everybody will die. when somebody else dies, your will lose your run."""
     display_name = "Death Link"
 
 class Traps(Range):

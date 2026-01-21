@@ -195,3 +195,7 @@ _speedups.html
 .LSOverride
 Thumbs.db
 [Dd]esktop.ini
+
+pyvenv.cfg
+Scripts
+share

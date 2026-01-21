@@ -31,6 +31,7 @@ class StellaWorld(World):
     Stella is a deck builder roguelike
     """
     game = "Stella"
+    web = StellaWebWorld()
 
     options: StellaOptions
     options_dataclass = StellaOptions

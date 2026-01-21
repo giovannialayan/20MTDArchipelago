@@ -1,6 +1,6 @@
 # Stella setup
 
-Archipelago support is built into Stella, so no mods or additional setup before opening the game is required.
+Archipelago support is built into Stella, so no mods are required.
 
 # Connecting
 

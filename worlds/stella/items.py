@@ -152,42 +152,6 @@ item_table: Dict[str, ItemData] = {
     "free +max element power in shop": ItemData(offset + 326)
 }
 
-item_id_to_name: Dict[int, str] = {
-    data.code: item_name for item_name, data in item_table.items() if data.code
-}
-
-item_name_to_id: Dict[str, int] = {
-    item_name: data.code for item_name, data in item_table.items() if data.code
-}
-
-deck_id_to_name: Dict[int, str] = {
-    data.code: item_name for item_name, data in item_table.items() if data.code and isDeck(item_name)
-}
-
-deck_name_to_id: Dict[str, int] = {
-    item_name: data.code for item_name, data in item_table.items() if data.code and isDeck(item_name)
-}
-
-cards: Dict[int, str] = {
-    data.code: data.code for item_name, data in item_table.items() if data.code and isCard(item_name)
-}
-
-elements: Dict[int, str] = {
-    data.code: data.code for item_name, data in item_table.items() if data.code and isElement(item_name)
-}
-
-traps: Dict[int, str] = {
-    data.code: data.code for item_name, data in item_table.items() if data.code and isTrap(item_name)
-}
-
-fillers: Dict[int, str] = {
-    data.code: data.code for item_name, data in item_table.items() if data.code and isFiller(item_name)
-}
-
-cards_and_elements: Dict[int, str] = {
-    data.code: data.code for item_name, data in item_table.items() if data.code and (isCard(item_name) or isElement(item_name))
-}
-
 def isDeck(item_name: str) -> bool: 
     item_id = item_name_to_id[item_name] - offset
     return (item_id >= 1 and item_id <= 39)
@@ -233,3 +197,39 @@ def get_category(item_name: str) -> str:
     if isTheirDeck(item_name):
         return "Their Deck"
     return "Other"
+
+item_id_to_name: Dict[int, str] = {
+    data.code: item_name for item_name, data in item_table.items() if data.code
+}
+
+item_name_to_id: Dict[str, int] = {
+    item_name: data.code for item_name, data in item_table.items() if data.code
+}
+
+deck_id_to_name: Dict[int, str] = {
+    data.code: item_name for item_name, data in item_table.items() if data.code and isDeck(item_name)
+}
+
+deck_name_to_id: Dict[str, int] = {
+    item_name: data.code for item_name, data in item_table.items() if data.code and isDeck(item_name)
+}
+
+cards: Dict[int, str] = {
+    data.code: data.code for item_name, data in item_table.items() if data.code and isCard(item_name)
+}
+
+elements: Dict[int, str] = {
+    data.code: data.code for item_name, data in item_table.items() if data.code and isElement(item_name)
+}
+
+traps: Dict[int, str] = {
+    data.code: data.code for item_name, data in item_table.items() if data.code and isTrap(item_name)
+}
+
+fillers: Dict[int, str] = {
+    data.code: data.code for item_name, data in item_table.items() if data.code and isFiller(item_name)
+}
+
+cards_and_elements: Dict[int, str] = {
+    data.code: data.code for item_name, data in item_table.items() if data.code and (isCard(item_name) or isElement(item_name))
+}
