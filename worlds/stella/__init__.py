@@ -1,10 +1,10 @@
 from typing import Dict, Union, List
 from worlds.AutoWorld import World, WebWorld
-from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, item_name_to_id, item_id_to_name, deck_id_to_name, \
+from .items import StellaItem, ItemData, cards, item_table, isYourDeck, isTheirDeck, isProgression, isUseful, item_name_to_id, item_id_to_name, deck_id_to_name, \
 cards_and_elements, elements
 from .items import offset as item_offset
 from .locations import StellaLocation, stella_location_name_to_id, stella_location_id_to_name, stella_location_id_to_difficulty, stella_location_id_to_lightyear, \
-card_id_offset, element_id_offset, max_shop_card_checks, max_shop_element_checks
+card_id_offset, element_id_offset, max_shop_card_checks, max_shop_element_checks, diffiulty_list
 from .options import StellaOptions, Goal, DecksToWin, DifficultyToWin
 from BaseClasses import ItemClassification, Region, LocationProgressType, CollectionState, Tutorial
 from worlds.generic.Rules import add_rule
@@ -55,13 +55,13 @@ class StellaWorld(World):
     itempool: list
 
     def generate_early(self):
-        self.required_difficulty = self.options.difficulty_to_win
+        self.required_difficulty = self.options.difficulty_to_win.value
         
     def create_items(self):
-        your_decks_to_unlock = self.options.your_decks_unlocked_from_start
-        their_decks_to_unlock = self.options.their_decks_unlocked_from_start
+        your_decks_to_unlock = self.options.your_decks_unlocked_from_start.value
+        their_decks_to_unlock = self.options.their_decks_unlocked_from_start.value
 
-        excluded_items = Dict[str, ItemData] = {}
+        excluded_items: Dict[str, ItemData] = {}
 
         your_deck_table: Dict[str, ItemData] = {}
         their_deck_table: Dict[str, ItemData] = {}
@@ -95,16 +95,17 @@ class StellaWorld(World):
 
         self.itempool = []
         for item_name in item_table:
-            self.itempool.append(self.create_item(item_name))
+            if not item_name in excluded_items: 
+                self.itempool.append(self.create_item(item_name))
 
-        for i in range(self.options.traps):
+        for i in range(self.options.traps.value):
             trap_id = self.random.randint(300, 306)
             self.itempool.append(self.create_item(item_id_to_name[trap_id + item_offset]))
 
         pool_remaining = self.locations_set - len(self.itempool)
         for i in range(pool_remaining):
             filler_id = self.random.randint(320, 326)
-            self.itempool.append(self.create_item(filler_id))
+            self.itempool.append(self.create_item(item_id_to_name[filler_id + item_offset]))
 
         self.multiworld.itempool += self.itempool
 
@@ -114,12 +115,14 @@ class StellaWorld(World):
             item_name = item
             item = item_table[item]
         else:
-            item_name = item_table[item]
+            item_name = item
 
         classification = ItemClassification.filler
 
         if isProgression(item_name):
             classification = ItemClassification.progression
+        elif isUseful(item_name):
+            classification = ItemClassification.useful
 
         if classification is ItemClassification.filler:
             if self.distributed_fillers.get(item_name) is None:
@@ -151,11 +154,15 @@ class StellaWorld(World):
 
                     new_location.progress_type = LocationProgressType.DEFAULT
 
-                    if lightyear >= 5:
-                        add_rule(new_location, lambda state, _lightyear_=lightyear: state.has_from_list(list(cards_and_elements.values()), self.player, 4 + _lightyear_ * 2))
+                    # if lightyear >= 5:
+                    #     add_rule(new_location, lambda state, _lightyear_=lightyear: state.has_from_list(list(cards_and_elements.values()), self.player, 2 + _lightyear_))
 
-                    if lightyear > 3:
-                        add_rule(new_location, lambda state, _difficulty_=difficulty: state.has_from_list(list(elements.values()), self.player, (_difficulty_ - 2) * 3))
+                    # if lightyear > 3:
+                    #     add_rule(new_location, lambda state, _difficulty_=difficulty: state.has_from_list(list(elements.values()), self.player, _difficulty_ * 3))
+
+                    if difficulty != 0:
+                        add_rule(new_location, lambda state, _deck_name_=deck_name, _lightyear_=lightyear, _difficulty_=difficulty: state.can_reach_location(
+                        _deck_name_ + " Lightyear " + str(_lightyear_) + " difficulty " + str(_difficulty_ - 1), self.player))
 
                     self.locations_set += 1
                     all_locations.append(new_location)
@@ -187,8 +194,8 @@ class StellaWorld(World):
             self.multiworld.completion_condition[self.player] = lambda state: can_reach_count(state, get_locations_where(None, 10, self.required_difficulty), 1)
 
     def fill_slot_data(self):
-        min_price = self.options.minimum_shop_price
-        max_price = self.options.maximum_shop_price
+        min_price = self.options.minimum_shop_price.value
+        max_price = self.options.maximum_shop_price.value
 
         if min_price > max_price:
             min_price, max_price = max_price, min_price
@@ -196,7 +203,7 @@ class StellaWorld(World):
         base_data = {
             "goal": self.options.goal.value,
             "decks_to_win": self.options.decks_to_win.value,
-            "required_difficulty": self.options.difficulty_to_win,
+            "required_difficulty": self.options.difficulty_to_win.value,
             "min_price": min_price,
             "max_price": max_price,
             "deathlink": bool(self.options.death_link)

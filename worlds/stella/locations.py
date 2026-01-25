@@ -52,3 +52,5 @@ for i in range(6):
 
         stella_location_name_to_id[location_name] = location_id
         stella_location_id_to_name[location_id] = location_name
+
+diffiulty_list = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]

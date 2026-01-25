@@ -182,7 +182,11 @@ def isFiller(item_name: str) -> bool:
 
 def isProgression(item_name: str) -> bool:
     return (
-        isDeck(item_name) or
+        isDeck(item_name)
+    )
+
+def isUseful(item_name: str) -> bool:
+    return (
         isCard(item_name) or
         isElement(item_name)
     )
